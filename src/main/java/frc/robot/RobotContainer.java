@@ -5,12 +5,15 @@ import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.ShootSequence;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
+import frc.robot.subsystems.ShooterSubsystem;
 
 public class RobotContainer {
 
   private final SwerveSubsystem driveBase = new SwerveSubsystem();
+  private final ShooterSubsystem shooter = new ShooterSubsystem();
   
   private final CommandXboxController m_driverController = new CommandXboxController(
       OperatorConstants.kDriverControllerPort);
@@ -29,7 +32,11 @@ public class RobotContainer {
         .scaleTranslation(0.8)
         .allianceRelativeControl(true);
 
+    m_driverController.rightTrigger(0.5)
+        .onTrue(new ShootSequence(shooter));
+    // Apply the drive command as the default
     driveBase.setDefaultCommand(driveBase.driveFieldOriented(driveInputStream));
+    shooter.setDefaultCommand(shooter.run(() -> shooter.stop()));
   }
 
   private void registerNamedCommands() {
