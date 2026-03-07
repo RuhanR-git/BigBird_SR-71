@@ -1,7 +1,5 @@
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
@@ -16,13 +14,14 @@ public class RobotContainer {
       OperatorConstants.kDriverControllerPort);
 
   public RobotContainer() {
-    registerNamedCommands();
+    // Note: Removed redundant NamedCommands.registerCommand here to prevent 
+    // circular logic since you are calling the full auto file directly.
 
     configureBindings();
 
     SwerveInputStream driveInputStream = SwerveInputStream.of(
         driveBase.getSwerveDrive(),
-        () -> m_driverController.getLeftY() * 1, 
+        () -> m_driverController.getLeftY() * -1, 
         () -> m_driverController.getLeftX() * 1) 
         .withControllerRotationAxis(() -> m_driverController.getRightX() * -1) 
         .deadband(OperatorConstants.DEADBAND)
@@ -32,19 +31,15 @@ public class RobotContainer {
     driveBase.setDefaultCommand(driveBase.driveFieldOriented(driveInputStream));
   }
 
-  private void registerNamedCommands() {
-    // These names must match the "Named Commands" you create in the PathPlanner App
-    NamedCommands.registerCommand("Follow Test Path", driveBase.followPathCommand("Test Auto"));
-  }
-
   private void configureBindings() {
     m_driverController.y().onTrue(driveBase.zeroGyroCommand());
     m_driverController.b().whileTrue(driveBase.lockPoseCommand());
-
-
   }
 
+  /**
+   * Returns the hard-coded autonomous command.
+   */
   public Command getAutonomousCommand() {
-    return driveBase.buildAutoCommand("Test Auto");
+    return driveBase.getTestAutoCommand();
   }
 }

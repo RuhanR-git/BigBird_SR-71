@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -19,11 +18,11 @@ import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
+
 public class SwerveSubsystem extends SubsystemBase {
   
   private final SwerveDrive swerveDrive;
@@ -41,22 +40,23 @@ public class SwerveSubsystem extends SubsystemBase {
     // Publish the field to NetworkTables for Glass visualization
     SmartDashboard.putData("Field", m_field);
 
-    // Setup AutoBuilder
     setupPathPlanner();
   }
 
   public final void setupPathPlanner() {
-    try 
-    {
+    try {
+      // RobotConfig automatically reads mass/dimensions from settings.json
       RobotConfig config = RobotConfig.fromGUISettings();
+
       AutoBuilder.configure(
           this::getPose, 
           swerveDrive::resetOdometry, 
           swerveDrive::getRobotVelocity, 
+          // 2025 output includes speeds and feedforwards
           (speeds, feedforwards) -> swerveDrive.drive(speeds), 
           new PPHolonomicDriveController(
-              new PIDConstants(5.0, 0.0, 0.0), // Translation PID
-              new PIDConstants(5.0, 0.0, 0.0)  // Rotation PID
+              new PIDConstants(0014645, 0.0, 0.0), // Translation PID
+              new PIDConstants(0.0014645, 0.0, 0.0)  // Rotation PID
           ),
           config,
           () -> {
@@ -66,13 +66,19 @@ public class SwerveSubsystem extends SubsystemBase {
           this);
 
       pathPlannerConfigured = true;
-    } 
-    catch (IOException | ParseException e) 
-    {
+    } catch (IOException | ParseException e) {
       pathPlannerConfigured = false;
-      DriverStation.reportError("Failed to configure PathPlanner: " + e.getMessage(), e.getStackTrace());
+      DriverStation.reportError("PathPlanner Config Failed: " + e.getMessage(), e.getStackTrace());
     }
-}
+  }
+
+  /*
+   * Directly builds the "Test Auto" command from .auto file.
+   */
+  public Command getTestAutoCommand() {
+    if (!pathPlannerConfigured) setupPathPlanner();
+    return AutoBuilder.buildAuto("Test Auto");
+  }
 
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
     return run(() -> swerveDrive.driveFieldOriented(velocity.get()));
@@ -86,48 +92,6 @@ public class SwerveSubsystem extends SubsystemBase {
     return run(() -> swerveDrive.lockPose());
   }
 
-  public Command followPathCommand(String pathName) {
-    if (!pathPlannerConfigured) {
-      setupPathPlanner();
-    }
-
-    if (!pathPlannerConfigured) {
-      DriverStation.reportError(
-          "Cannot follow path '" + pathName + "' because PathPlanner AutoBuilder is not configured.",
-          false);
-      return Commands.none();
-    }
-
-    try {
-      return AutoBuilder.followPath(PathPlannerPath.fromPathFile(pathName));
-    } catch (Exception e) {
-      DriverStation.reportError("Failed to load path '" + pathName + "': " + e.getMessage(),
-          e.getStackTrace());
-      return Commands.none();
-    }
-  }
-
-  public Command buildAutoCommand(String autoName) {
-    if (!pathPlannerConfigured) {
-      setupPathPlanner();
-    }
-
-    if (!pathPlannerConfigured) {
-      DriverStation.reportError(
-          "Cannot build auto '" + autoName + "' because PathPlanner AutoBuilder is not configured.",
-          false);
-      return Commands.none();
-    }
-
-    try {
-      return AutoBuilder.buildAuto(autoName);
-    } catch (Exception e) {
-      DriverStation.reportError("Failed to load auto '" + autoName + "': " + e.getMessage(),
-          e.getStackTrace());
-      return Commands.none();
-    }
-  }
-
   public Pose2d getPose() {
     return swerveDrive.getPose();
   }
@@ -139,6 +103,7 @@ public class SwerveSubsystem extends SubsystemBase {
   @Override
   public void periodic() {
     swerveDrive.updateOdometry();
+    // Updates the robot icon location in Glass
     m_field.setRobotPose(swerveDrive.getPose());
   }
 }
