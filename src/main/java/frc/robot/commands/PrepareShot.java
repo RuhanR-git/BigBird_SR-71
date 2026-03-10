@@ -1,14 +1,20 @@
 package frc.robot.commands;
 
-import java.util.Optional;
+//import java.util.Optional;
 import java.util.function.Supplier;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
+import edu.wpi.first.math.interpolation.Interpolator;
+import edu.wpi.first.math.interpolation.InverseInterpolator;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+//import edu.wpi.first.wpilibj.DriverStation;
+//import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.SelectHub;
+import frc.robot.ShooterState;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
@@ -30,52 +36,43 @@ public class PrepareShot extends Command   {
 
     private Distance getDistanceToHub() {
         final Translation2d robotPosition = robotPoseSupplier.get().getTranslation();
-        final Optional<Alliance> alliance = DriverStation.getAlliance();
-        final Translation2d hubPosition;
-        if (alliance.isPresent()   && alliance.get() == Alliance.Blu e ) {
-            hubPosition = new Translation2d(Inches.of(182.105), Inches.of(158.845));
-        }
-        return Meters.of(robotPosition.getDistance(hubPosition));
+            return Meters.of(robotPosition.getDistance(SelectHub.hubPosition()));
     } 
- 
-
-    
-    
-    public double rpm;
-    public double pivotAngle;
-
-    public ShooterState(double rpm, double pivotAngle) {
-        this.rpm = rpm;
-        this.pivotAngle = pivotAngle;
-    }
-
-    @Override
-    public ShooterState interpolate(ShooterState endValue, double t) {
-        // 't' is a value from 0 to 1 representing how far we are between points
-        double lerpRPM = this.rpm + (endValue.rpm - this.rpm) * t;
-        double lerpPivot = this.pivotAngle + (endValue.pivotAngle - this.pivotAngle) * t;
-        
-        return new ShooterState(lerpRPM, lerpPivot);
-    }
 
 
-
-    private ShooterState getShooterState(){
+        private ShooterState getShooterState(){
         Distance hubDistance = getDistanceToHub();
 
         // Distance (meters) -> ShooterState (RPM & Angle)
-        InterpolatingTreeMap<Double, ShooterState> shooterTable = new InterpolatingTreeMap<>();
-
+        final InterpolatingTreeMap<Distance, ShooterState> distanceToShotMap = new InterpolatingTreeMap<>(
+        (startValue, endValue, q) -> 
+            InverseInterpolator.forDouble()
+                .inverseInterpolate(startValue.in(Meters), endValue.in(Meters), q.in(Meters)),
+        (startValue, endValue, t) ->
+            new ShooterState(
+                Interpolator.forDouble()
+                    .interpolate(startValue.rpm, endValue.rpm, t),
+                Interpolator.forDouble()
+                    .interpolate(startValue.hoodPosition, endValue.hoodPosition, t)
+            )
+    );
         // Add your calibration data
         // Distance, new ShooterState(RPM, PivotPosition)
-        shooterTable.put(1.0, new ShooterState(1500, 10.0));
-        shooterTable.put(3.0, new ShooterState(2500, 25.0));
-
+        distanceToShotMap.put(Inches.of(52.0), new ShooterState(2800, 0.19));
+        distanceToShotMap.put(Inches.of(114.4), new ShooterState(3275, 0.40));
+        distanceToShotMap.put(Inches.of(165.5), new ShooterState(3650, 0.48));
         // To use it:
-        double distanceToTarget = 2.0; // We are halfway between our points
-        ShooterState currentSetpoints = shooterTable.get(distanceToTarget);
+        ShooterState currentSetpoints = distanceToShotMap.get(hubDistance);
 
         return currentSetpoints;
+    }
+
+    public void execute() {
+        final Distance distanceToHub = getDistanceToHub();
+        final ShooterState shot = getShooterState();
+        shooter.setShooter(shot.rpm);
+        hood.setPosition(shot.hoodPosition);
+        SmartDashboard.putNumber("Distance to Hub (inches)", distanceToHub.in(Inches));
     }
 
 }

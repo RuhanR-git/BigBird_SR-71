@@ -1,10 +1,16 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
 //import com.revrobotics.spark.SparkBase.PersistMode;
 //import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.config.SparkMaxConfig;
+//import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkRelativeEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FuelConstants;
@@ -12,31 +18,36 @@ import frc.robot.Constants.FuelConstants;
 
 public class ShooterSubsystem extends SubsystemBase {
     // create motors
-    private final SparkMax ShooterMotorLeft, ShooterMotorMid,ShooterMotorRight,IndexerMotor,FeederMotor;
-    
+    private final SparkFlex ShooterMotorLeft, ShooterMotorMid,ShooterMotorRight,IndexerMotor,FeederMotor;
+    private final SparkClosedLoopController controllerLeft,controllerRight,controllerMid;
 
     // @SuppressWarnings("removal")
     public ShooterSubsystem() {
 
-        ShooterMotorLeft = new SparkMax(FuelConstants.ShooterMotorLeftID, MotorType.kBrushless);
-        ShooterMotorMid = new SparkMax(FuelConstants.ShooterMotorMidID, MotorType.kBrushless);
-        ShooterMotorRight = new SparkMax(FuelConstants.ShooterMotorRightID, MotorType.kBrushless);
-        IndexerMotor = new SparkMax(FuelConstants.IndexerMotorID, MotorType.kBrushless);
-        FeederMotor = new SparkMax(FuelConstants.FeederMotorID, MotorType.kBrushless);
+        ShooterMotorLeft = new SparkFlex(FuelConstants.ShooterMotorLeftID, MotorType.kBrushless);
+        ShooterMotorMid = new SparkFlex(FuelConstants.ShooterMotorMidID, MotorType.kBrushless);
+        ShooterMotorRight = new SparkFlex(FuelConstants.ShooterMotorRightID, MotorType.kBrushless);
+        IndexerMotor = new SparkFlex(FuelConstants.IndexerMotorID, MotorType.kBrushless);
+        FeederMotor = new SparkFlex(FuelConstants.FeederMotorID, MotorType.kBrushless);
 
-        SparkMaxConfig shooterConfig = new SparkMaxConfig();
+        controllerLeft = ShooterMotorLeft.getClosedLoopController();
+        controllerMid = ShooterMotorMid.getClosedLoopController();
+        controllerRight = ShooterMotorRight.getClosedLoopController();
+
+
+        SparkFlexConfig shooterConfig = new SparkFlexConfig();
         shooterConfig.inverted(false);
         shooterConfig.smartCurrentLimit(FuelConstants.maxVoltage);
 
-        SparkMaxConfig ShooterLeftConfig = shooterConfig;
+        SparkFlexConfig ShooterLeftConfig = shooterConfig;
         ShooterLeftConfig.inverted(false);
-        SparkMaxConfig ShooterMidConfig = shooterConfig;
+        SparkFlexConfig ShooterMidConfig = shooterConfig;
         ShooterMidConfig.inverted(false);
-        SparkMaxConfig ShooterRightConfig = shooterConfig;
+        SparkFlexConfig ShooterRightConfig = shooterConfig;
         ShooterRightConfig.inverted(false);
-        SparkMaxConfig IndexerConfig = shooterConfig;
+        SparkFlexConfig IndexerConfig = shooterConfig;
         IndexerConfig.inverted(false);
-        SparkMaxConfig FeederConfig = shooterConfig;
+        SparkFlexConfig FeederConfig = shooterConfig;
         FeederConfig.inverted(false);
 
         ShooterMotorLeft.configure(ShooterLeftConfig, com.revrobotics.ResetMode.kResetSafeParameters,
@@ -64,6 +75,12 @@ public class ShooterSubsystem extends SubsystemBase {
         ShooterMotorLeft.set(value);
         ShooterMotorMid.set(value);
         ShooterMotorRight.set(value);
+    }
+
+    public void setShooterRPM(double value) {
+        controllerLeft.setSetpoint(value, ControlType.kVelocity);
+        controllerMid.setSetpoint(value, ControlType.kVelocity);
+        controllerRight.setSetpoint(value, ControlType.kVelocity);
     }
 
     public void stop() {
