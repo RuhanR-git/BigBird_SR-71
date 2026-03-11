@@ -1,0 +1,10 @@
+{
+  "intakeArmID": 20,
+  "intakeWheelsID": 10,
+  "intakeArmCurrentLimit": 35,
+  "intakeWheelsCurrentLimit": 35,
+  "intakeWheelsIntakeSpeed": 0.3,
+  "intakeWheelsOuttakeSpeed": -0.3,
+  "intakeArmDeploySpeed": 0.3,
+  "intakeArmStowSpeed": -0.3
+}
