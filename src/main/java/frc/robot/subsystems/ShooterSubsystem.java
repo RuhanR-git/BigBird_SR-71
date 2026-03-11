@@ -1,7 +1,7 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase;
+//import com.revrobotics.RelativeEncoder;
+//import com.revrobotics.spark.SparkBase;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 //import com.revrobotics.spark.SparkBase.PersistMode;
@@ -9,9 +9,16 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 //import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkRelativeEncoder;
+
+//import static edu.wpi.first.units.Units.RPM;
+
+import java.util.List;
+
+//import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
+//import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.FuelConstants;
 
@@ -21,6 +28,10 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkFlex ShooterMotorLeft, ShooterMotorMid,ShooterMotorRight,IndexerMotor,FeederMotor;
     private final SparkClosedLoopController controllerLeft,controllerRight,controllerMid;
 
+    private final List<SparkFlex> motors;
+
+
+    private double targetSpeed;
     // @SuppressWarnings("removal")
     public ShooterSubsystem() {
 
@@ -34,6 +45,7 @@ public class ShooterSubsystem extends SubsystemBase {
         controllerMid = ShooterMotorMid.getClosedLoopController();
         controllerRight = ShooterMotorRight.getClosedLoopController();
 
+        motors = List.of(ShooterMotorLeft, ShooterMotorMid, ShooterMotorRight);
 
         SparkFlexConfig shooterConfig = new SparkFlexConfig();
         shooterConfig.inverted(false);
@@ -81,6 +93,16 @@ public class ShooterSubsystem extends SubsystemBase {
         controllerLeft.setSetpoint(value, ControlType.kVelocity);
         controllerMid.setSetpoint(value, ControlType.kVelocity);
         controllerRight.setSetpoint(value, ControlType.kVelocity);
+        targetSpeed = value;
+
+    }
+
+    public boolean isVelocityWithinTolerance() {
+        return motors.stream().allMatch(motor -> {
+            SparkRelativeEncoder encoder = (SparkRelativeEncoder) motor.getEncoder();
+            double rpm = encoder.getVelocity();
+            return (Math.abs(rpm - targetSpeed) < FuelConstants.kVelocityTolerance);
+        });
     }
 
     public void stop() {

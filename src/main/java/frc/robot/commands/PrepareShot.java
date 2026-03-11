@@ -67,6 +67,10 @@ public class PrepareShot extends Command   {
         return currentSetpoints;
     }
 
+    public boolean isReadyToShoot() {
+        return shooter.isVelocityWithinTolerance() && hood.isPositionWithinTolerance();
+    }
+
     public void execute() {
         final Distance distanceToHub = getDistanceToHub();
         final ShooterState shot = getShooterState();

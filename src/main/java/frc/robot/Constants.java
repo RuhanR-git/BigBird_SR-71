@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+//import static edu.wpi.first.units.Units.RPM;
+
 import edu.wpi.first.math.util.Units;
+//import edu.wpi.first.units.measure.AngularVelocity;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -32,6 +35,8 @@ public final class Constants {
 
     public static final int kHoodLeftServo = 1;
     public static final int kHoodRightServo = 2;
+
+    public static final double kVelocityTolerance = 100;
 
   }
 }
