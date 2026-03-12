@@ -50,6 +50,11 @@ public class ShooterSubsystem extends SubsystemBase {
         SparkFlexConfig shooterConfig = new SparkFlexConfig();
         shooterConfig.inverted(false);
         shooterConfig.smartCurrentLimit(FuelConstants.maxVoltage);
+        shooterConfig.closedLoop
+        .p(FuelConstants.PIDConstants.ShooterKp)
+        .i(FuelConstants.PIDConstants.ShooterKi)
+        .d(FuelConstants.PIDConstants.ShooterKd)
+        .outputRange(FuelConstants.PIDConstants.ShooterKMinOutput, FuelConstants.PIDConstants.ShooterKMaxOutput);
 
         SparkFlexConfig ShooterLeftConfig = shooterConfig;
         ShooterLeftConfig.inverted(false);
@@ -89,12 +94,11 @@ public class ShooterSubsystem extends SubsystemBase {
         ShooterMotorRight.set(value);
     }
 
-    public void setShooterRPM(double value) {
-        controllerLeft.setSetpoint(value, ControlType.kVelocity);
-        controllerMid.setSetpoint(value, ControlType.kVelocity);
-        controllerRight.setSetpoint(value, ControlType.kVelocity);
-        targetSpeed = value;
-
+    public void setShooterRPM(double rpm) {
+        controllerLeft.setSetpoint(rpm, ControlType.kVelocity);
+        controllerMid.setSetpoint(rpm, ControlType.kVelocity);
+        controllerRight.setSetpoint(rpm, ControlType.kVelocity);
+        targetSpeed = rpm;
     }
 
     public boolean isVelocityWithinTolerance() {

@@ -38,5 +38,14 @@ public final class Constants {
 
     public static final double kVelocityTolerance = 100;
 
+    public static class PIDConstants {
+      public static final double ShooterKp = 0;
+      public static final double ShooterKi = 0;
+      public static final double ShooterKd = 0;
+      
+      public static final double ShooterKMinOutput = 0;
+      public static final double ShooterKMaxOutput = 0;
+    }
+
   }
 }
