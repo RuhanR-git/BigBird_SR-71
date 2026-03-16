@@ -24,7 +24,6 @@ public class SpinUp extends Command {
     // appropriate values for intaking
     @Override
     public void initialize() {
-        ShootSubsystem.setShooter(1);
         ShootSubsystem.setFeeder(0.66);
         ShootSubsystem.setIndexer(0);
     }
@@ -33,6 +32,8 @@ public class SpinUp extends Command {
     // command doesn't require updating any values while running
     @Override
     public void execute() {
+        ShootSubsystem.setFeeder(0.66);
+        ShootSubsystem.setIndexer(0);
     }
 
     // Called once the command ends or is interrupted. Stop the rollers

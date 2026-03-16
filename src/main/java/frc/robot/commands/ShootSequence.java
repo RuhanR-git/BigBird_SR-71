@@ -4,20 +4,31 @@
 
 package frc.robot.commands;
 
+import java.util.function.Supplier;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.wpilibj2.command.Commands;
+//import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.Constants.FuelConstants;
+//import frc.robot.Constants.FuelConstants;
+import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ShootSequence extends SequentialCommandGroup {
-    /** Creates a new LaunchSequence. */
-    public ShootSequence(ShooterSubsystem FuelSubsystem) {
+    /* Creates a new LaunchSequence. */
+    public ShootSequence(ShooterSubsystem shooter, HoodSubsystem hood, Supplier<Pose2d> botPose ) {
+        final PrepareShot prepareShotCommand = new PrepareShot(shooter, hood, botPose);
         // Add your commands in the addCommands() call, e.g.
         // addCommands(new FooCommand(), new BarCommand());
         addCommands(
-                new SpinUp(FuelSubsystem).withTimeout(FuelConstants.SpinUpSec),
-                new Shoot(FuelSubsystem));
-    }
+                Commands.waitSeconds(0.5)
+                .andThen(prepareShotCommand),
+                Commands.waitUntil(() -> prepareShotCommand.isReadyToShoot())
+                .andThen(new Shoot(shooter)));
+                //Commands.waitUntil(() -> PrepareShot.isReadyToShoot());
+                //Commands.andThen(new SpinUp(FuelSubsystem));
+            }
 }
