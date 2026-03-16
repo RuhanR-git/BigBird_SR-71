@@ -21,4 +21,30 @@ public final class Constants {
     public static final double DEADBAND = 0.1;
   }
   public static final double maxSpeed = Units.inchesToMeters(2);
+
+  public static class FuelConstants
+  {
+    public static final int ShooterMotorLeftID = 1;
+    public static final int ShooterMotorMidID = 2;
+    public static final int ShooterMotorRightID = 3;
+    public static final int maxVoltage = 35;
+    public static final int IndexerMotorID = 4;
+    public static final int FeederMotorID = 5;
+    public static final int SpinUpSec = 2;
+
+    public static final int kHoodLeftServo = 1;
+    public static final int kHoodRightServo = 2;
+
+    public static final double kVelocityTolerance = 100;
+
+    public static class PIDConstants 
+    {
+      public static final double ShooterKp = 0;
+      public static final double ShooterKi = 0;
+      public static final double ShooterKd = 0;
+      
+      public static final double ShooterKMinOutput = 0;
+      public static final double ShooterKMaxOutput = 0;
+    }
+  }
 }

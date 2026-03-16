@@ -11,6 +11,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -20,6 +21,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 import swervelib.SwerveDrive;
 import swervelib.parser.SwerveParser;
 
@@ -72,6 +74,14 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
+  public void updateVisionOdometry(){
+    LimelightHelpers.PoseEstimate limelightMeasurement = LimelightHelpers.getBotPoseEstimate_wpiBlue("limelight-first");
+    if(limelightMeasurement.tagCount >= 1)
+    {
+      swerveDrive.addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds, VecBuilder.fill(.7,.7,9999999));
+    }
+  }
+
   /*
    * Directly builds the "Test Auto" command from .auto file.
    */
@@ -102,6 +112,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
+    updateVisionOdometry();
     swerveDrive.updateOdometry();
     // Updates the robot icon location in Glass
     m_field.setRobotPose(swerveDrive.getPose());

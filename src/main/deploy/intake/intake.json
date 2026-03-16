@@ -1,6 +1,6 @@
 {
-  "intakeArmID": 20,
-  "intakeWheelsID": 10,
+  "intakeArmID": 7,
+  "intakeWheelsID": 6,
   "intakeArmCurrentLimit": 35,
   "intakeWheelsCurrentLimit": 35,
   "intakeWheelsIntakeSpeed": 0.3,

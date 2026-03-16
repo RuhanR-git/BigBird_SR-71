@@ -6,17 +6,28 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import swervelib.SwerveInputStream;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 
-// Imports from our code
+// Imports from our code (subsystems)
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+
+//Import from our code (commands)
+import frc.robot.commands.ShootSequence;
 
 public class RobotContainer {
 
-  private final SwerveSubsystem driveBase = new SwerveSubsystem();
+  private final SwerveSubsystem m_swerveSubsystem = new SwerveSubsystem();
 
   private final IntakeSubsystem m_intakeSubsystem = new IntakeSubsystem();
-  
+
+  private final HoodSubsystem m_hoodSubsystem = new HoodSubsystem();
+
+  private final ShooterSubsystem m_shooterSubsystem = new ShooterSubsystem();
+
   private final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
   private final CommandXboxController m_operatorController = new CommandXboxController(OperatorConstants.kOperatorControllerPort);
 
@@ -34,7 +45,7 @@ public class RobotContainer {
     //Left joystick: Strafing
     //Right joystick: Rotation
     SwerveInputStream driveInputStream = SwerveInputStream.of(
-        driveBase.getSwerveDrive(),
+        m_swerveSubsystem.getSwerveDrive(),
         () -> m_driverController.getLeftY() * 1, 
         () -> m_driverController.getLeftX() * 1) 
         .withControllerRotationAxis(() -> m_driverController.getRightX() * -1) 
@@ -46,9 +57,9 @@ public class RobotContainer {
 
     // Y -> Zero Gyro
     // B -> Lock Pose, locks robot wheels to only move forward
-    driveBase.setDefaultCommand(driveBase.driveFieldOriented(driveInputStream));
-    m_driverController.y().onTrue(driveBase.zeroGyroCommand());
-    m_driverController.b().whileTrue(driveBase.lockPoseCommand());
+    m_swerveSubsystem.setDefaultCommand(m_swerveSubsystem.driveFieldOriented(driveInputStream));
+    m_driverController.y().onTrue(m_swerveSubsystem.zeroGyroCommand());
+    m_driverController.b().whileTrue(m_swerveSubsystem.lockPoseCommand());
 
     // --- Operator bindings for intake (Operator controller)---
 
@@ -61,14 +72,24 @@ public class RobotContainer {
     // Right Trigger -> Jiggle Balls towards shooter
     m_operatorController.rightTrigger()
       .whileTrue(m_intakeSubsystem.shooterJiggleCommand()
-      .alongWith(Commands.print("Jiggling intake...")))
-      .onFalse(m_intakeSubsystem.stowCommand());
+      .alongWith(Commands.print("Jiggling intake..."), Commands.runOnce(() -> {
+        Pose2d targetPose = new Pose2d(SelectHub.hubPosition(), new Rotation2d());
+        SwerveInputStream angleDriveInputStream = driveInputStream.copy().aim(targetPose);
+        m_swerveSubsystem.driveFieldOriented(angleDriveInputStream);
+
+        new ShootSequence(m_shooterSubsystem, m_hoodSubsystem, () -> m_swerveSubsystem.getPose());
+      })));
+
+    // Apply the drive command as the default
+    m_swerveSubsystem.setDefaultCommand(m_swerveSubsystem.driveFieldOriented(driveInputStream));
+    m_shooterSubsystem.setDefaultCommand(m_shooterSubsystem.run(() -> m_shooterSubsystem.stop()));
+    m_intakeSubsystem.setDefaultCommand(m_intakeSubsystem.stowCommand());
   }
 
   /**
    * Returns the hard-coded autonomous command.
    */
   public Command getAutonomousCommand() {
-    return driveBase.getTestAutoCommand();
+    return m_swerveSubsystem.getTestAutoCommand();
   }
 }

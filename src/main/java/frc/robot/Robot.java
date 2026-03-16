@@ -35,10 +35,29 @@ public class Robot extends TimedRobot {
   }
 
   // Other periodic methods remain empty or unchanged as per standard WPILib templates
-  @Override public void disabledInit() {}
-  @Override public void disabledPeriodic() {}
-  @Override public void autonomousPeriodic() {}
-  @Override public void teleopPeriodic() {}
-  @Override public void testInit() { CommandScheduler.getInstance().cancelAll(); }
-  @Override public void testPeriodic() {}
+  @Override 
+  public void disabledInit() 
+  {
+
+  }
+  @Override public void disabledPeriodic() 
+  {
+
+  }
+  @Override public void autonomousPeriodic() 
+  {
+
+  }
+  @Override public void teleopPeriodic() 
+  {
+
+  }
+  @Override public void testInit() 
+  { 
+    CommandScheduler.getInstance().cancelAll(); 
+  }
+  @Override public void testPeriodic() 
+  {
+
+  }
 }
