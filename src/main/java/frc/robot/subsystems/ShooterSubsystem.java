@@ -26,9 +26,8 @@ import edu.wpi.first.wpilibj.Filesystem;
 //import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.subsystems.ShooterConfig;
-
 public class ShooterSubsystem extends SubsystemBase { 
+    @SuppressWarnings("FieldMayBeFinal")
     // create motors
     private final SparkFlex ShooterMotorLeft, ShooterMotorMid,ShooterMotorRight,IndexerMotor,FeederMotor;
     private final SparkClosedLoopController controllerLeft,controllerRight,controllerMid;
@@ -37,9 +36,8 @@ public class ShooterSubsystem extends SubsystemBase {
 
     private ShooterConfig ShooterConfig;
 
-
     private double targetSpeed;
-    // @SuppressWarnings("removal")
+    @SuppressWarnings("FieldMayBeFinal")
     public ShooterSubsystem() {
         // Load JSON Configuration
     try {
