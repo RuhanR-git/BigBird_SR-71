@@ -7,9 +7,11 @@ import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -57,7 +59,7 @@ public class SwerveSubsystem extends SubsystemBase {
           // 2025 output includes speeds and feedforwards
           (speeds, feedforwards) -> swerveDrive.drive(speeds), 
           new PPHolonomicDriveController(
-              new PIDConstants(0014645, 0.0, 0.0), // Translation PID
+              new PIDConstants(0.0014645, 0.0, 0.0), // Translation PID
               new PIDConstants(0.0014645, 0.0, 0.0)  // Rotation PID
           ),
           config,
@@ -80,14 +82,6 @@ public class SwerveSubsystem extends SubsystemBase {
     {
       swerveDrive.addVisionMeasurement(limelightMeasurement.pose, limelightMeasurement.timestampSeconds, VecBuilder.fill(.7,.7,9999999));
     }
-  }
-
-  /*
-   * Directly builds the "Test Auto" command from .auto file.
-   */
-  public Command getTestAutoCommand() {
-    if (!pathPlannerConfigured) setupPathPlanner();
-    return AutoBuilder.buildAuto("Test Auto");
   }
 
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
@@ -116,5 +110,17 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveDrive.updateOdometry();
     // Updates the robot icon location in Glass
     m_field.setRobotPose(swerveDrive.getPose());
+  }
+
+  /**
+   * Get the path follower with events.
+   *
+   * @param pathName PathPlanner path name.
+   * @return {@link AutoBuilder#followPath(PathPlannerPath)} path command.
+   */
+  public Command getAutonomousCommand(String pathName)
+  {
+    // Create a path following command using AutoBuilder. This will also trigger event markers.
+    return new PathPlannerAuto(pathName);
   }
 }

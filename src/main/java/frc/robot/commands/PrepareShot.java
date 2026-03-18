@@ -8,18 +8,15 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.interpolation.InterpolatingTreeMap;
 import edu.wpi.first.math.interpolation.Interpolator;
 import edu.wpi.first.math.interpolation.InverseInterpolator;
+import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meters;
 import edu.wpi.first.units.measure.Distance;
-//import edu.wpi.first.wpilibj.DriverStation;
-//import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.SelectHub;
 import frc.robot.ShooterState;
 import frc.robot.subsystems.HoodSubsystem;
 import frc.robot.subsystems.ShooterSubsystem;
-
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.Inches;
 
 public class PrepareShot extends Command   {
 
@@ -71,6 +68,7 @@ public class PrepareShot extends Command   {
         return shooter.isVelocityWithinTolerance() && hood.isPositionWithinTolerance();
     }
 
+    @Override
     public void execute() {
         final Distance distanceToHub = getDistanceToHub();
         final ShooterState shot = getShooterState();
@@ -79,6 +77,7 @@ public class PrepareShot extends Command   {
         SmartDashboard.putNumber("Distance to Hub (inches)", distanceToHub.in(Inches));
     }
 
+    @Override
     public void end(boolean interrupted) {
         shooter.stop();
     }

@@ -1,22 +1,21 @@
 package frc.robot;
 
 // WPILIB and YAGSL imports
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
-import swervelib.SwerveInputStream;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Rotation2d;
-
-// Imports from our code (subsystems)
-import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.HoodSubsystem;
-import frc.robot.subsystems.ShooterSubsystem;
-
-//Import from our code (commands)
+import frc.robot.commands.IntakeBall;
 import frc.robot.commands.ShootSequence;
+import frc.robot.commands.ShooterJiggle;
+import frc.robot.commands.StowIntake;
+import frc.robot.subsystems.HoodSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
+import swervelib.SwerveInputStream;
 
 public class RobotContainer {
 
@@ -65,31 +64,47 @@ public class RobotContainer {
 
     // Left Trigger -> Intake Balls
     m_operatorController.leftTrigger()
-    .whileTrue(m_intakeSubsystem.intakeCommand()
-    .alongWith(Commands.print("Intaking balls...")))
-    .onFalse(m_intakeSubsystem.stowCommand());
+    .whileTrue(new IntakeBall(m_intakeSubsystem))
+    .onFalse(new StowIntake(m_intakeSubsystem));
     
-    // Right Trigger -> Jiggle Balls towards shooter
-    m_operatorController.rightTrigger()
-      .whileTrue(m_intakeSubsystem.shooterJiggleCommand()
-      .alongWith(Commands.print("Jiggling intake..."), Commands.runOnce(() -> {
-        Pose2d targetPose = new Pose2d(SelectHub.hubPosition(), new Rotation2d());
-        SwerveInputStream angleDriveInputStream = driveInputStream.copy().aim(targetPose);
-        m_swerveSubsystem.driveFieldOriented(angleDriveInputStream);
-
-        new ShootSequence(m_shooterSubsystem, m_hoodSubsystem, () -> m_swerveSubsystem.getPose());
-      })));
+    // Right Trigger -> The "Big Dumper" Shooting Logic
+m_operatorController.rightTrigger()
+    .whileTrue(
+        //Start the Jiggle
+        new ShooterJiggle(m_intakeSubsystem)
+        //Simultaneously aim the robot and run the shoot sequence
+        .alongWith(
+            Commands.runOnce(() -> {
+                Pose2d targetPose = new Pose2d(SelectHub.hubPosition(), new Rotation2d());
+                SwerveInputStream angleDriveInputStream = driveInputStream.copy().aim(targetPose);
+                m_swerveSubsystem.setDefaultCommand(m_swerveSubsystem.driveFieldOriented(angleDriveInputStream));
+            }),
+            // This replaces the deprecated .schedule() call
+            new ShootSequence(m_shooterSubsystem, m_hoodSubsystem, () -> m_swerveSubsystem.getPose())
+        )
+    )
+    .onFalse(
+        // When let go: Stow the intake and reset the drive to normal field-oriented
+        new StowIntake(m_intakeSubsystem)
+            .alongWith(Commands.runOnce(() -> 
+                m_swerveSubsystem.setDefaultCommand(m_swerveSubsystem.driveFieldOriented(driveInputStream))
+            ))
+    );
 
     // Apply the drive command as the default
     m_swerveSubsystem.setDefaultCommand(m_swerveSubsystem.driveFieldOriented(driveInputStream));
     m_shooterSubsystem.setDefaultCommand(m_shooterSubsystem.run(() -> m_shooterSubsystem.stop()));
-    m_intakeSubsystem.setDefaultCommand(m_intakeSubsystem.stowCommand());
+    m_intakeSubsystem.setDefaultCommand(new StowIntake(m_intakeSubsystem));
   }
 
   /**
-   * Returns the hard-coded autonomous command.
+   * Use this to pass the autonomous command to the main {@link Robot} class.
+   *
+   * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand() {
-    return m_swerveSubsystem.getTestAutoCommand();
+  public Command getAutonomousCommand()
+  {
+    // An example command will be run in autonomous
+    return m_swerveSubsystem.getAutonomousCommand("Test Auto");
   }
 }

@@ -1,29 +1,29 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.Seconds;
-import static edu.wpi.first.units.Units.Millimeters;
-import static edu.wpi.first.units.Units.Second;
-import static edu.wpi.first.units.Units.Value;
-
 import java.io.File;
 import java.io.IOException;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.wpi.first.math.MathUtil;
+import static edu.wpi.first.units.Units.Millimeters;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Value;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.Servo;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj.Timer;
 
-public class HoodSubsystem extends SubsystemBase{
+public final class HoodSubsystem extends SubsystemBase{
     private final Servo actuatorLeft, actuatorRight;
 
+    @SuppressWarnings("FieldMayBeFinal")
     private ShooterConfig ShooterConfig;
 
     private double currentPosition = 0.5;
@@ -38,15 +38,15 @@ public class HoodSubsystem extends SubsystemBase{
     private static final double kPositionTolerance = 0.01;
 
 
-    public HoodSubsystem(){
-        // Load JSON Configuration
+    public HoodSubsystem() 
+    {
+        File directory = new File(Filesystem.getDeployDirectory(), "shooter.json");
         try {
-          File configFile = new File(Filesystem.getDeployDirectory(), "shooter.json");
-          ShooterConfig = new ObjectMapper().readValue(configFile, ShooterConfig.class);
+            ShooterConfig = new ObjectMapper().readValue(directory, ShooterConfig.class);
         } catch (IOException e) {
-          System.err.println("Shooter JSON Load Failed! Using Hard-coded defaults.");
-          ShooterConfig = new ShooterConfig();
+            throw new RuntimeException(e);
         }
+
         actuatorLeft = new Servo(ShooterConfig.actuatorLeftServo);
         actuatorRight = new Servo(ShooterConfig.actuatorRightServo);
 

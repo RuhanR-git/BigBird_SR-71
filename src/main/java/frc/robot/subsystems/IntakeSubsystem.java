@@ -6,10 +6,10 @@ import java.io.IOException;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -21,13 +21,12 @@ public class IntakeSubsystem extends SubsystemBase {
   private final SparkMax armMotor;
 
   public IntakeSubsystem() {
-    // 1. Load JSON Configuration
-    try {
-      File configFile = new File(Filesystem.getDeployDirectory(), "intake.json");
-      intakeConfig = new ObjectMapper().readValue(configFile, IntakeConfig.class);
-    } catch (IOException e) {
-      intakeConfig = new IntakeConfig();
-    }
+    File directory = new File(Filesystem.getDeployDirectory(), "intake.json");
+        try {
+            intakeConfig = new ObjectMapper().readValue(directory, IntakeConfig.class);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
     // Initialize Motors (Crucial step: you must instantiate them before configuring)
     rollerMotor = new TalonFX(intakeConfig.intakeWheelsID);

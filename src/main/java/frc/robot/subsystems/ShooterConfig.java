@@ -20,7 +20,7 @@ public class ShooterConfig {
     public double actuatorVelocityTolerance;
 
     // Operational Speeds
-    public double SpinUpSec;
+    public double spinUpSeconds;
 
     // PID Constants
     public double shooterP;
