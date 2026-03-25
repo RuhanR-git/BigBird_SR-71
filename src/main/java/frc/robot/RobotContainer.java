@@ -1,61 +1,91 @@
 package frc.robot;
 
-// WPILIB and YAGSL imports
-//import edu.wpi.first.math.geometry.Pose2d;
-//import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
+/**
+ * RobotContainer is where the bulk of the robot members are declared.
+ * This class ties subsystems, controllers, and button bindings together.
+ */
 public class RobotContainer {
 
+  // 1. SUBSYSTEMS: Creating the "Body Parts"
+  // We create an instance of SwerveSubsystem so we can tell the drivetrain what to do.
   private final SwerveSubsystem m_swerveSubsystem = new SwerveSubsystem();
 
+  // 2. CONTROLLERS: Defining the Inputs
+  // CommandXboxController is a wrapper that makes it easy to link buttons to commands.
+  // kDriverControllerPort is usually '0' (set in Constants.java).
   private final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
+  /**
+   * CONSTRUCTOR: Runs once when the robot starts.
+   */
   public RobotContainer() {
-    // Note: Removed redundant NamedCommands.registerCommand here to prevent 
-    // circular logic since you are calling the full auto file directly.
-
+    // Setup the button mappings defined below.
     configureBindings();
   }
 
+  /**
+   * BINDINGS: This is where we define how the robot reacts to the controller.
+   */
   private void configureBindings() 
   {
-    // --- Driver bindings for driving (Driver controller)---
-
-    //Left joystick: Strafing
-    //Right joystick: Rotation
+    // --- DRIVING LOGIC ---
+    
+    // SwerveInputStream is a YAGSL tool that "cleans up" joystick data.
+    // It handles things like deadbands (so the robot doesn't drift if the stick is loose)
+    // and scaling (so the robot isn't too twitchy).
     SwerveInputStream driveInputStream = SwerveInputStream.of(
-        m_swerveSubsystem.getSwerveDrive(),
-        () -> m_driverController.getLeftY() * 1, 
+        m_swerveSubsystem.getSwerveDrive(), 
+        // Forward/Backward (Y-Axis). Note: Up on the stick is usually negative, so we multiply by 1 or -1 if needed.
+        () -> m_driverController.getLeftY() * 1,
+        // Left/Right Strafe (X-Axis).
         () -> m_driverController.getLeftX() * 1) 
-        .withControllerRotationAxis(() -> m_driverController.getRightX() * -1) 
+
+        // Rotation: We use the Right Stick to spin the robot. 
+        // We multiply by -1 here because usually "Right" on the stick should be "Clockwise."
+        .withControllerRotationAxis(() -> m_driverController.getRightX() * -1)
+        
+        // Deadband: If the stick is pushed less than X% (e.g., 0.1), ignore it. 
+        // This prevents "stick drift" where the robot moves even when you aren't touching it.
         .deadband(OperatorConstants.DEADBAND)
+        
+        // Scale: Reduces speed to 80% (0.8) to make the robot easier to control for the driver.
         .scaleTranslation(0.8)
+        
+        // Alliance Relative: If true, "Forward" is always away from the driver's wall,
+        // regardless of which way the robot is facing.
         .allianceRelativeControl(true);
 
-    // --- Extra Driver bindings for driving ---
+    // --- ASSIGNING COMMANDS TO BUTTONS ---
 
-    // Y -> Zero Gyro
-    // B -> Lock Pose, locks robot wheels to only move forward
+    // SET DEFAULT COMMAND: This tells the robot "If I am not pressing any other buttons, do THIS."
+    // In this case, the robot should always be listening to the joysticks to drive.
     m_swerveSubsystem.setDefaultCommand(m_swerveSubsystem.driveFieldOriented(driveInputStream));
+
+    // Y BUTTON: Resets the Gyro. 
+    // If the robot's "Forward" direction gets confused, the driver points the robot 
+    // away from them and presses Y to reset the "North" star.
     m_driverController.y().onTrue(m_swerveSubsystem.zeroGyroCommand());
+
+    // B BUTTON: "Parking Brake" / Lock Pose.
+    // While the driver holds B, the wheels turn into an 'X' shape so the robot cannot be pushed.
     m_driverController.b().whileTrue(m_swerveSubsystem.lockPoseCommand());
-    // Apply the drive command as the default
-    m_swerveSubsystem.setDefaultCommand(m_swerveSubsystem.driveFieldOriented(driveInputStream));
   }
 
   /**
-   * Use this to pass the autonomous command to the main {@link Robot} class.
-   *
-   * @return the command to run in autonomous
+   * AUTONOMOUS: This method is called by the main Robot.java file when the 15-second 
+   * auto period starts.
+   * * @return The command to run (in this case, the path named "Test Auto" from PathPlanner).
    */
   public Command getAutonomousCommand()
   {
-    // An example command will be run in autonomous
+    // This tells the SwerveSubsystem to look for a file named "Test Auto" 
+    // created in the PathPlanner GUI and execute those movements.
     return m_swerveSubsystem.getAutonomousCommand("Test Auto");
   }
 }
