@@ -127,7 +127,7 @@ public class SwerveSubsystem extends SubsystemBase {
    */
   public Command driveFieldOriented(Supplier<ChassisSpeeds> velocity) {
     return run(() -> swerveDrive.driveFieldOriented(velocity.get()));
-  }
+  } 
 
   /**
    * Resets the Gyro (Compass). Use this if the robot's "forward" gets messed up.

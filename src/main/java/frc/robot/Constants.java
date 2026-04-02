@@ -18,7 +18,7 @@ public final class Constants {
   public static class OperatorConstants {
     public static final int kDriverControllerPort = 0;
     public static final int kOperatorControllerPort = 1;
-    public static final double DEADBAND = 0.1;
+    public static final double DEADBAND = 0.15;
   }
-  public static final double maxSpeed = 4.5;
+  public static final double maxSpeed = 5;
 }

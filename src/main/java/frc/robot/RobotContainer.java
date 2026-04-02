@@ -42,9 +42,9 @@ public class RobotContainer {
     SwerveInputStream driveInputStream = SwerveInputStream.of(
         m_swerveSubsystem.getSwerveDrive(), 
         // Forward/Backward (Y-Axis). Note: Up on the stick is usually negative, so we multiply by 1 or -1 if needed.
-        () -> m_driverController.getLeftY() * 1,
+        () -> m_driverController.getLeftY() * -1,
         // Left/Right Strafe (X-Axis).
-        () -> m_driverController.getLeftX() * 1) 
+        () -> m_driverController.getLeftX() * -1) 
 
         // Rotation: We use the Right Stick to spin the robot. 
         // We multiply by -1 here because usually "Right" on the stick should be "Clockwise."
@@ -54,8 +54,8 @@ public class RobotContainer {
         // This prevents "stick drift" where the robot moves even when you aren't touching it.
         .deadband(OperatorConstants.DEADBAND)
         
-        // Scale: Reduces speed to 80% (0.8) to make the robot easier to control for the driver.
-        .scaleTranslation(0.8)
+        // Scale: Reduces speed to make the robot easier to control for the driver.
+        .scaleTranslation(0.5)
         
         // Alliance Relative: If true, "Forward" is always away from the driver's wall,
         // regardless of which way the robot is facing.
