@@ -20,5 +20,5 @@ public final class Constants {
     public static final int kOperatorControllerPort = 1;
     public static final double DEADBAND = 0.15;
   }
-  public static final double maxSpeed = 5;
+  public static final double maxSpeed = 3.2 ;
 }
