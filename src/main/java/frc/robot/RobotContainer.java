@@ -4,6 +4,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.OLEDPongSubsystem;
 import swervelib.SwerveInputStream;
 
 /**
@@ -15,6 +16,11 @@ public class RobotContainer {
   // 1. SUBSYSTEMS: Creating the "Body Parts"
   // We create an instance of SwerveSubsystem so we can tell the drivetrain what to do.
   private final SwerveSubsystem m_swerveSubsystem = new SwerveSubsystem();
+
+  // OLED Pong - Fun extra, disabled if causing issues
+  // Set ENABLE_OLED_PONG to false to completely disable
+  private static final boolean ENABLE_OLED_PONG = true;
+  private final OLEDPongSubsystem pongSubsystem = ENABLE_OLED_PONG ? new OLEDPongSubsystem() : null;
 
   // 2. CONTROLLERS: Defining the Inputs
   // CommandXboxController is a wrapper that makes it easy to link buttons to commands.
