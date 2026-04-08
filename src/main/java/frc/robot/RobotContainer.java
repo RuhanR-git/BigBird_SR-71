@@ -1,10 +1,13 @@
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder; // New Import
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser; // New Import
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // New Import
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.OLEDPongSubsystem;
 import swervelib.SwerveInputStream;
 
 /**
@@ -17,10 +20,11 @@ public class RobotContainer {
   // We create an instance of SwerveSubsystem so we can tell the drivetrain what to do.
   private final SwerveSubsystem m_swerveSubsystem = new SwerveSubsystem();
 
+  private final SendableChooser<Command> autoChooser;
+
   // OLED Pong - Fun extra, disabled if causing issues
   // Set ENABLE_OLED_PONG to false to completely disable
-  private static final boolean ENABLE_OLED_PONG = true;
-  private final OLEDPongSubsystem pongSubsystem = ENABLE_OLED_PONG ? new OLEDPongSubsystem() : null;
+  private static final boolean ENABLE_OLED_PONG = false;
 
   // 2. CONTROLLERS: Defining the Inputs
   // CommandXboxController is a wrapper that makes it easy to link buttons to commands.
@@ -31,6 +35,12 @@ public class RobotContainer {
    * CONSTRUCTOR: Runs once when the robot starts.
    */
   public RobotContainer() {
+    // 2. Build the chooser. 
+    // This automatically finds every .auto file in your 'deploy/pathplanner/autos' folder!
+    autoChooser = AutoBuilder.buildAutoChooser();
+
+    // 3. Put the chooser on the Dashboard for Glass to see
+    SmartDashboard.putData("Auto Chooser", autoChooser);
     // Setup the button mappings defined below.
     configureBindings();
   }
@@ -90,8 +100,8 @@ public class RobotContainer {
    */
   public Command getAutonomousCommand()
   {
-    // This tells the SwerveSubsystem to look for a file named "Test Auto" 
+    // This tells the SwerveSubsystem to look for the selected auto 
     // created in the PathPlanner GUI and execute those movements.
-    return m_swerveSubsystem.getAutonomousCommand("Test Auto");
+    return autoChooser.getSelected();
   }
 }

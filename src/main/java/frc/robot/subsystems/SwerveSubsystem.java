@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import org.json.simple.parser.ParseException;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -169,14 +168,5 @@ public class SwerveSubsystem extends SubsystemBase {
     
     // Update the virtual robot icon on the dashboard so we can debug movement.
     m_field.setRobotPose(swerveDrive.getPose());
-  }
-
-  /**
-   * Command to run a PathPlanner autonomous routine by name.
-   * @param pathName The name of the file created in the PathPlanner GUI.
-   */
-  public Command getAutonomousCommand(String pathName)
-  {
-    return new PathPlannerAuto(pathName);
   }
 }
