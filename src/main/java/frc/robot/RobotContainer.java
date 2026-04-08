@@ -1,7 +1,7 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder; // New Import
-
+import frc.robot.subsystems.OLEDPongSubsystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser; // New Import
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // New Import
 import edu.wpi.first.wpilibj2.command.Command;
@@ -22,9 +22,10 @@ public class RobotContainer {
 
   private final SendableChooser<Command> autoChooser;
 
-  // OLED Pong - Fun extra, disabled if causing issues
+  //OLED Pong - Fun extra, disabled if causing issues
   // Set ENABLE_OLED_PONG to false to completely disable
-  private static final boolean ENABLE_OLED_PONG = false;
+  private static final boolean ENABLE_OLED_PONG = true;
+  private final OLEDPongSubsystem pongSubsystem = ENABLE_OLED_PONG ? new OLEDPongSubsystem() : null;
 
   // 2. CONTROLLERS: Defining the Inputs
   // CommandXboxController is a wrapper that makes it easy to link buttons to commands.
