@@ -1,12 +1,13 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder; // New Import
-import frc.robot.subsystems.OLEDPongSubsystem;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser; // New Import
+
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard; // New Import
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Command; // New Import
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.OLEDPongSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 import swervelib.SwerveInputStream;
 
@@ -32,18 +33,23 @@ public class RobotContainer {
   // kDriverControllerPort is usually '0' (set in Constants.java).
   private final CommandXboxController m_driverController = new CommandXboxController(OperatorConstants.kDriverControllerPort);
 
-  /**
-   * CONSTRUCTOR: Runs once when the robot starts.
-   */
   public RobotContainer() {
-    // 2. Build the chooser. 
-    // This automatically finds every .auto file in your 'deploy/pathplanner/autos' folder!
-    autoChooser = AutoBuilder.buildAutoChooser();
+    // Register Named Commands for PathPlanner
+    // This allows you to drag a "Wait and Align" event into your path in the GUI.
+    com.pathplanner.lib.auto.NamedCommands.registerCommand("VisionAlign", m_swerveSubsystem.visionAlignCommand());
 
-    // 3. Put the chooser on the Dashboard for Glass to see
+    autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
-    // Setup the button mappings defined below.
     configureBindings();
+  }
+
+  /**
+   * NEW FOR 2026: This logic ensures that as soon as Teleop begins,
+   * the robot's heading is aligned with its last known position from Auto.
+   * It uses Vision (Limelight) if a tag is visible for maximum precision.
+   */
+  public void setupTeleopHeading() {
+    m_swerveSubsystem.updateHeadingWithVision();
   }
 
   /**
@@ -59,9 +65,9 @@ public class RobotContainer {
     SwerveInputStream driveInputStream = SwerveInputStream.of(
         m_swerveSubsystem.getSwerveDrive(), 
         // Forward/Backward (Y-Axis). Note: Up on the stick is usually negative, so we multiply by 1 or -1 if needed.
-        () -> m_driverController.getLeftY() * 1,
+        () -> m_driverController.getLeftY() * -1,
         // Left/Right Strafe (X-Axis).
-        () -> m_driverController.getLeftX() * 1) 
+        () -> m_driverController.getLeftX() * -1) 
 
         // Rotation: We use the Right Stick to spin the robot. 
         // We multiply by -1 here because usually "Right" on the stick should be "Clockwise."
