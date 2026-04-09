@@ -13,6 +13,8 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -159,7 +161,7 @@ public class SwerveSubsystem extends SubsystemBase {
    * Resets the Gyro (Compass). Use this if the robot's "forward" gets messed up.
    */
   public Command zeroGyroCommand() {
-    return runOnce(() -> swerveDrive.zeroGyro());
+    return runOnce(() -> swerveDrive.setGyro(DriverStation.getAlliance().get() == DriverStation.Alliance.Red ? new Rotation3d(Rotation2d.k180deg) : Rotation3d.kZero));
   }
 
   /**

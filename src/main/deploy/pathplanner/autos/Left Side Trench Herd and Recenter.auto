@@ -7,13 +7,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Red 1 L2 Part 1"
+            "pathName": "Left Side Trench Drives To Center and Angles"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Red 1 L2 Part 2"
+            "pathName": "Left Side Trench Herd Balls"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Left Side ReCenter after Herd"
           }
         }
       ]
