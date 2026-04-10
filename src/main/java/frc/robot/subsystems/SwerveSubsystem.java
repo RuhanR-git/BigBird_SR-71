@@ -99,8 +99,8 @@ public class SwerveSubsystem extends SubsystemBase {
           new PPHolonomicDriveController(
               // PIDConstants: These control how hard the robot fights to stay on a path.
               // If the robot wobbles, these numbers are too high. If it's lazy, they are too low.
-              new PIDConstants(0.0014645, 0.0, 0.0), // Translation (Moving X and Y)
-              new PIDConstants(0.0014645, 0.0, 0.0)  // Rotation (Turning)
+              new PIDConstants(0.0020645, 0.0, 0.0), // Translation (Moving X and Y)
+              new PIDConstants(0.01, 0.0, 0.0)  // Rotation (Turning)
           ),
           config,
           () -> {

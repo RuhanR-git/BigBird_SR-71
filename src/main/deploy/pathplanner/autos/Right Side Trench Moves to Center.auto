@@ -9,6 +9,12 @@
           "data": {
             "pathName": "Right Side Trench Move Forward"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Right Side Trench Moves to Center"
+          }
         }
       ]
     }
